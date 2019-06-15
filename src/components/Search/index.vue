@@ -6,7 +6,8 @@
         <input type="text" v-model="message">
       </div>
     </div>
-    <div class="search_result">
+    <Loading v-if="isLoading"></Loading>
+    <div v-else class="search_result">
       <h3>电影/电视剧/综艺</h3>
       <ul>
         <li v-for="(item, index) in moviesList.list" :key="item.dur">
@@ -31,6 +32,7 @@
       return {
         message: '',
         moviesList: [],
+        isLoading:false,
       }
     },
     methods: {
@@ -44,15 +46,17 @@
     watch: {
       message(newVal) {
         var that =this;
+        var cityId=this.$store.state.city.id
         this.cancelRequest();
-        
-        this.axios.get("/api/searchList?cityId=10&kw=" + newVal,{
+        this.isLoading=true;
+        this.axios.get('/api/searchList?cityId='+cityId+'&kw=' + newVal,{
           cancelToken: new this.axios.CancelToken(function executor(c) {
                     that.source = c;
                 })
         }).then((res) => {
           var msg = res.data.msg;
           var movies = res.data.data.movies;
+          this.isLoading=false;
           if (msg && movies) {
             this.moviesList = movies;
           }
